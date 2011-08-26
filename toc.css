@@ -1,0 +1,9 @@
+h4 {
+    margin: 0;
+    padding: 12px 0;
+    font-size: 11px;
+    font-weight: bold;
+    border-top: 1px solid #C0CEDB;
+    border-bottom: 2px solid #C0CEDB;
+    background: #F2F6F7;
+}
