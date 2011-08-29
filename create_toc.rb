@@ -1,7 +1,6 @@
 require 'nokogiri'
-require 'open-uri'
 require 'selenium-webdriver'
-
+require 'amqp'
 
 @driver = Selenium::WebDriver.for :chrome
 
@@ -57,11 +56,7 @@ begin
       end
       writer << "</table>"
       writer << "</body></html>"
-  end
-  
-  #@div = @driver.find_element(:css => "div#tabtoc.tocdiv")
-  
-  
+  end  
 rescue Selenium::WebDriver::Error::NoSuchElementError => e
   puts e.inspect 
 ensure
