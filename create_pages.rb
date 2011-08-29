@@ -3,7 +3,7 @@ require 'selenium-webdriver'
 
 
 begin	
-  @driver = Selenium::WebDriver.for :firefox
+  @driver = Selenium::WebDriver.for :chrome
 	@driver.get "http://proquest.safaribooksonline.com.ezproxy.spl.org:2048/book/web-development/ruby/9780321669919/distributed-message-queues/ch08"
 
   element = @driver.find_element(:name => "user")
