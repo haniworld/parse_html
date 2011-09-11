@@ -1,9 +1,12 @@
 require 'nokogiri'
+require 'net/http'
 require 'selenium-webdriver'
 
 
 begin	
-  @driver = Selenium::WebDriver.for :chrome
+  @root = Dir.pwd
+  
+  @driver = Selenium::WebDriver.for :firefox
 	@driver.get "http://proquest.safaribooksonline.com.ezproxy.spl.org:2048/book/web-development/ruby/9780321669919/distributed-message-queues/ch08"
 
   element = @driver.find_element(:name => "user")
@@ -22,12 +25,27 @@ begin
     wait.until { @driver.find_element(:css => "div.htmlcontent")}
   end
   
-  # Open the TOC in Nokogiri
+  # Scrap only the html content
   @doc = Nokogiri::HTML(@driver.page_source)
   page = @doc.at_css("div.htmlcontent")
   
   # Process images on the page
-  
+  img_dir = @root + '/img'
+  Dir.mkdir(img_dir) unless File.directory?(img_dir)
+  page.css("img").each do | image |
+    img_src = image.attributes['src'].value
+    # Save the image to the image folder
+    socket = @driver.current_url.gsub("http://", "").split('/').first
+    host = socket.split(':').first
+    port = socket.split(':').last
+    # Press ctrl + click
+    @driver.action.key_down(:control).click(image).action.key_up(:control).perform
+    4.times do
+      @driver.send_keys(:arrow_down)
+    end
+    @driver.send_keys(:enter)
+    
+  end
   
   File.open('test.html', 'w') do | writer |
       writer << "<!DOCTYPE HTML>"
@@ -46,6 +64,7 @@ begin
 rescue Selenium::WebDriver::Error::NoSuchElementError => e
   puts e.inspect
 ensure
+  @driver.navigate.to('/logout?targetpage=/securelogin')
   @driver.quit
 end
 

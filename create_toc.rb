@@ -1,11 +1,13 @@
-require 'nokogiri'
-require 'selenium-webdriver'
+load 'htmlpagewriter.rb'
 require 'amqp'
 
-@driver = Selenium::WebDriver.for :chrome
+@toc_url = ARGV[0]
+puts @toc_url
+@book_dir = "test_dir"
+@driver = Selenium::WebDriver.for :firefox
 
 # Open SPL login page and login
-@driver.get("http://proquest.safaribooksonline.com.ezproxy.spl.org:2048/book/software-engineering-and-development/software-testing/9780321670250")
+@driver.get(@toc_url)
 
 begin
   element = @driver.find_element(:name => "user")
@@ -19,7 +21,9 @@ begin
   @doc = Nokogiri::HTML(@driver.page_source)
   @doc.at_css("div#tabtoc.tocdiv")
   
-  File.open('toc.html', 'w') do | writer |
+  Dir.mkdir(@book_dir) unless File.directory?(@book_dir)
+  puts "success"
+  File.open(@book_dir + '/toc.html', 'w') do | writer |
       writer << "<!DOCTYPE HTML>"
       writer << "<html>"
       writer << "<head>"
@@ -42,9 +46,11 @@ begin
       toc = @doc.at_css("div.toc_book")
       writer << "<table style='padding:0px'>"
       
+      page_writer = HtmlPageWriter.new(@driver)
       toc.css("div").each do | item |
         loc = item.css("a").first.attributes['href'].value
-        file = loc.split("/").last + ".html"
+        file = @book_dir + "/" + loc.split("/").last + ".html"
+        page_writer.create_page(loc, file)
         if item.css("h4").size > 0  # Part title
           title = "<a href=\"#{file}\">#{item.text}</a>"
         elsif item.css("h5").size > 0 # Chapter title
@@ -63,5 +69,3 @@ ensure
   @driver.quit
 end
 
-# Read HTML from morning star
-#doc = Nokogiri::HTML(open("http://quote.morningstar.com/stock/s.aspx?t=AAPL"))
